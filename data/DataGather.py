@@ -6,6 +6,7 @@ import pandas as pd
 import sys
 import os
 from data import DataUtils
+import time
 import numpy as np
 from sklearn import preprocessing
 from datetime import date, timedelta
@@ -21,10 +22,17 @@ class _DataGather:
         self.raw_data_folder = DataUtils.get_raw_data_path()
 
     def get_stock_data_frame(self):
-        if not os.path.exists(self.raw_data_folder + '/' + self.stock_num + '.csv'):
+        file_path = self.raw_data_folder + '/' + self.stock_num + '.csv'
+        if not os.path.exists(file_path):
+            print('parse start: ', self.stock_num)
             df_stock_info = self.__get_stock_dataframe_from_web()
         else:
-            df_stock_info = self.__update_stock_info()
+            now_time = time.time()
+            modify_time = os.path.getmtime(file_path)
+            if ((now_time - modify_time) > 60 * 60 * 12) or (time.gmtime(now_time).tm_hour > 9):
+                print('update start: ', self.stock_num)
+                df_stock_info = self.__update_stock_info()
+
             # if __is_need_update(stock_num):
             #     df_stock_info = __update_stock_info(stock_num)
             # else:

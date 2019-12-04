@@ -1,5 +1,5 @@
 import tensorflow as tf
-from train.env import EnvForeign, EnvPrice
+from train.environment import EnvForeign, EnvPrice
 
 # print(tf.__version__)
 # foreign = EnvForeign.ForeignAccount()
@@ -19,27 +19,7 @@ from train.env import EnvForeign, EnvPrice
 # print(foreign.print_account_state('2019.11.08'))
 # print(price.print_account_state('2019.11.08'))
 
-class A:
-    title = 'title_a'
+from data import DataManager
 
-    def print_a(self):
-        print(__class__.__name__)
-        print(self.title)
+DataManager.update_raw_data()
 
-
-class B(A):
-    title = 'title_b'
-
-    def print_b(self):
-        self.print_a()
-        print(__class__.__name__)
-
-class C(A):
-    title = 'title_c'
-    def print_c(self):
-        self.print_a()
-        print(__class__.__name__)
-
-B().print_b()
-C().print_c()
-B().print_b()

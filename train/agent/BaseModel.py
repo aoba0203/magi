@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from data import DataManager
 import os
+from utils import utils
 
 # https://github.com/rlcode/reinforcement-learning-kr/blob/master/3-atari/1-breakout/breakout_a3c.py
 # https://github.com/yinchuandong/A3C-keras/blob/master/a3c.py
@@ -23,15 +24,15 @@ class BaseModel:
     eval_y = None
     epoch = None
 
-    def __init__(self, _input_size, _output_size, _train_x_raw, _train_x_chart, _train_y, _eval_x, _eval_y, output_activation='tanh'):
+    def __init__(self, _input_size, _output_size, output_activation='tanh'):
         self.input_size = _input_size
         self.output_size = _output_size
         self.output_activation = output_activation
-        self.train_x_raw = _train_x_raw
-        self.train_x_chart = _train_x_chart
-        self.train_y = _train_y
-        self.eval_x = _eval_x
-        self.eval_y = _eval_y
+        # self.train_x_raw = _train_x_raw
+        # self.train_x_chart = _train_x_chart
+        # self.train_y = _train_y
+        # self.eval_x = _eval_x
+        # self.eval_y = _eval_y
         self.epoch = 10
 
     def get_cnn_model(self):
@@ -90,10 +91,11 @@ class BaseModel:
         model_actor = keras.Model(inputs=[self.dense_input, self.cnn_input], outputs=[model_actor])
         model_critic = keras.Model(inputs=[self.dense_input, self.cnn_input], outputs=[model_critic])
 
-        weight_file, _ = self.get_best_loss_file(_class_name)
-        if weight_file is None:
-            model_actor.load_weights(weight_file)
-            model_critic.load_weights(weight_file)
+        file_actor, file_critic = self.get_weight_file(_class_name)
+        if file_actor is None:
+            model_actor.load_weights(file_actor)
+            model_critic.load_weights(file_critic)
+        return model_actor, model_critic
 
     def get_model_weight_path(self, _class_name):
         paths = os.getcwd() + '/model_weight/' + _class_name + '/'
@@ -101,23 +103,31 @@ class BaseModel:
             os.makedirs(paths)
         return paths
 
-    def get_best_loss_file(self, _class_name):
+    def get_weight_file(self, _class_name):
         best_loss_file = None
         best_loss = 100
         file_list = os.listdir(self.get_model_weight_path(_class_name))
-        for file in file_list:
-            loss = float(file.split('.')[0].split('_')[3])
-            if best_loss > loss:
-                best_loss = loss
-                best_loss_file = file
-        return best_loss_file, best_loss
+        file_list.sort()
+        # for file in file_list:
+        #     loss = float(file.split('.')[0].split('_')[3])
+        #     if best_loss > loss:
+        #         best_loss = loss
+        #         best_loss_file = file
+        # return best_loss_file, best_loss
+        actor = file_list[-2]
+        critic = file_list[-1]
+        return actor, critic
 
-    def model_evaluate_management(self, _loss_func, _class_name):
-        self.model_actor.compile(optimizer='rmsprop', loss=_loss_func, metrics=['accuracy'])
-        loss, accuracy = self.model_actor.evaluate(self.eval_x, self.eval_y)
-        _, best_loss = self.get_best_loss_file(_class_name)
+    def model_evaluate_and_save(self, _actor, _critic, _class_name):
+        # self.model_actor.compile(optimizer='rmsprop', loss=_loss_func, metrics=['accuracy'])
+        # loss, accuracy = self.model_actor.evaluate(self.eval_x, self.eval_y)
+        #
+        # _, best_loss = self.get_best_loss_file(_class_name)
 
-        if best_loss > loss:
-            path = self.get_model_weight_path(_class_name)
-            file_name = path + _class_name + '_weight' + '_acc_' + str(round(accuracy * 100, 2)) + '.h5'
-            self.model_actor.save_weights(file_name)
+        # if best_loss > loss:
+        today = utils.get_today()
+        time_now = utils.get_time()
+        path = self.get_model_weight_path(_class_name)
+        file_path = path + _class_name + '_' + today + '_' + time_now + '_'
+        _actor.save_weights(file_path + 'actor.h5')
+        _critic.save_weights(file_path + 'critic.h5')

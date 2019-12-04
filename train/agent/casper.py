@@ -20,7 +20,7 @@ class Casper(BaseModel.BaseModel):
             self.train_y,
             epochs=self.epoch
         )
-        self.model_evaluate_management(self.get_casper_loss, self.__class__.__name__)
+        self.model_evaluate_and_save(self.get_casper_loss, self.__class__.__name__)
 
 
 

@@ -1,5 +1,6 @@
 import numpy as np
-from data import DataGather
+from data import DataUtils
+import pandas as pd
 
 DIFF_DAY_TOMORROW = -1
 DIFF_DAY_TODAY = 0
@@ -44,3 +45,9 @@ class DayUtils:
         demand_agency = self.stock_df.iloc[position_today - DIFF_DAY_TODAY]['agency']
         return demand_agency
 
+
+def get_month_list(_stock_num):
+    stock_dataframe = DataUtils.get_stock_df(_stock_num)
+    day_end = stock_dataframe.index[0]
+    day_start = stock_dataframe.index[-1]
+    return pd.date_range(day_start, day_end, freq='MS').strftime('%Y.%m').tolist()

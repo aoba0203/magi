@@ -1,6 +1,8 @@
 from data import DataGather
 from data import DatasetMaker
 from data import DayUtils, DataUtils
+import pandas as pd
+import multiprocessing as mp
 
 
 class DataManager:
@@ -27,11 +29,27 @@ class DataManager:
     def get_daylist_in_month(self, _target_month):
         return self.DatasetManager.get_day_list_in_month(_target_month)
 
+    def get_dataset_in_month(self, _target_month):
+        return self.DatasetManager.get_sliced_dataset(_target_month)
+
     def get_raw_path(self):
         return DataUtils.get_raw_data_path()
 
     def get_chart_path(self):
         return DataUtils.get_chart_data_path()
+
+
+def parse_dataframe(_stock_num):
+    print('parse start')
+    DataGather._DataGather(_stock_num).get_stock_data_frame()
+
+
+def update_raw_data():
+    stock_list = DataUtils.get_stock_num_list()
+    print(stock_list)
+    pool = mp.Pool(2)
+    pool.map(parse_dataframe, stock_list)
+    
 
 
 
